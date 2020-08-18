@@ -43,6 +43,7 @@ func InitDB(cnf DBConfigParams) error {
 	}
 	log.Println("--- Database Connected ---")
 	Db = db
+	Db.LogMode(true)
 	return nil
 }
 

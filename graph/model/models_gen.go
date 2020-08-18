@@ -18,6 +18,8 @@ type NewOrder struct {
 }
 
 type NewTechnician struct {
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
@@ -28,6 +30,8 @@ type NewTelevision struct {
 }
 
 type NewUser struct {
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
@@ -48,7 +52,8 @@ type RefreshTokenInput struct {
 }
 
 type Technician struct {
-	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }
@@ -60,8 +65,8 @@ type Television struct {
 }
 
 type User struct {
-	ID        string `json:"id"`
 	Email     string `json:"email"`
+	Password  string `json:"password"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 }

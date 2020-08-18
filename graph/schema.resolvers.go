@@ -10,11 +10,23 @@ import (
 	"github.com/cybernuki/Service_Order_System/graph/generated"
 	"github.com/cybernuki/Service_Order_System/graph/model"
 	"github.com/cybernuki/Service_Order_System/internal/database/models"
+	"github.com/cybernuki/Service_Order_System/internal/jwt"
 )
 
+// CreateUser - mutation that creates an user and returns the generated token
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
-	user := model.User{FirstName: input.FirstName, LastName: input.LastName}
-	return "User: " + user.FirstName + " " + user.LastName, nil
+	var user models.SchemaUser
+	user.Email = input.Email
+	user.Password = input.Password
+	user.FirstName = input.FirstName
+	user.LastName = input.LastName
+
+	err := user.Create()
+	if err != nil {
+		return "", err
+	}
+	token, err := jwt.GenerateToken(user.Email)
+	return token, err
 }
 
 func (r *mutationResolver) CreateTechnician(ctx context.Context, input model.NewTechnician) (*model.Technician, error) {

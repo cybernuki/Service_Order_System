@@ -9,7 +9,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/cybernuki/Service_Order_System/graph"
 	"github.com/cybernuki/Service_Order_System/graph/generated"
+	"github.com/cybernuki/Service_Order_System/internal/auth"
 	"github.com/cybernuki/Service_Order_System/internal/database/models"
+	"github.com/go-chi/chi"
 )
 
 const defaultPort = "8000"
@@ -29,16 +31,16 @@ func main() {
 	if migration == "true" || migration == "True" {
 		models.MigrateAll()
 	}
+	router := chi.NewRouter()
+	router.Use(auth.Middleware())
 
-	if true {
-		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
-		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-		http.Handle("/query", srv)
+	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	router.Handle("/query", srv)
 
-		log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-		http.ListenAndServe(":"+port, nil)
-	}
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	http.ListenAndServe(":"+port, router)
 
 	defer models.CloseDB()
 }
