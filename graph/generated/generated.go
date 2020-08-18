@@ -44,15 +44,13 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		CreateOrder      func(childComplexity int, input model.NewOrder) int
+		CreateOrder      func(childComplexity int, input model.NewOrder, login model.Login) int
 		CreateTechnician func(childComplexity int, input model.NewTechnician) int
 		CreateTelevision func(childComplexity int, input model.NewTelevision) int
 		CreateUser       func(childComplexity int, input model.NewUser) int
 		Login            func(childComplexity int, input model.Login) int
 		RefreshToken     func(childComplexity int, input model.RefreshTokenInput) int
-		UpdateOrder      func(childComplexity int, input model.NewOrder) int
-		UpdateTechnician func(childComplexity int, input model.NewTechnician) int
-		UpdateUser       func(childComplexity int, input model.NewUser) int
+		UpdateOrder      func(childComplexity int, token string, input model.NewOrder) int
 	}
 
 	Order struct {
@@ -64,6 +62,11 @@ type ComplexityRoot struct {
 		Tv           func(childComplexity int) int
 		URL          func(childComplexity int) int
 		User         func(childComplexity int) int
+	}
+
+	OrderCreated struct {
+		Toke func(childComplexity int) int
+		URL  func(childComplexity int) int
 	}
 
 	Query struct {
@@ -97,12 +100,10 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input model.NewUser) (string, error)
-	CreateTechnician(ctx context.Context, input model.NewTechnician) (*model.Technician, error)
+	CreateTechnician(ctx context.Context, input model.NewTechnician) (string, error)
 	CreateTelevision(ctx context.Context, input model.NewTelevision) (*model.Television, error)
-	CreateOrder(ctx context.Context, input model.NewOrder) (*model.Order, error)
-	UpdateUser(ctx context.Context, input model.NewUser) (string, error)
-	UpdateTechnician(ctx context.Context, input model.NewTechnician) (*model.Technician, error)
-	UpdateOrder(ctx context.Context, input model.NewOrder) (*model.Order, error)
+	CreateOrder(ctx context.Context, input model.NewOrder, login model.Login) (*model.OrderCreated, error)
+	UpdateOrder(ctx context.Context, token string, input model.NewOrder) (string, error)
 	Login(ctx context.Context, input model.Login) (string, error)
 	RefreshToken(ctx context.Context, input model.RefreshTokenInput) (string, error)
 }
@@ -139,7 +140,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateOrder(childComplexity, args["input"].(model.NewOrder)), true
+		return e.complexity.Mutation.CreateOrder(childComplexity, args["input"].(model.NewOrder), args["login"].(model.Login)), true
 
 	case "Mutation.createTechnician":
 		if e.complexity.Mutation.CreateTechnician == nil {
@@ -211,31 +212,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateOrder(childComplexity, args["input"].(model.NewOrder)), true
-
-	case "Mutation.updateTechnician":
-		if e.complexity.Mutation.UpdateTechnician == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateTechnician_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateTechnician(childComplexity, args["input"].(model.NewTechnician)), true
-
-	case "Mutation.updateUser":
-		if e.complexity.Mutation.UpdateUser == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_updateUser_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.NewUser)), true
+		return e.complexity.Mutation.UpdateOrder(childComplexity, args["token"].(string), args["input"].(model.NewOrder)), true
 
 	case "Order.calification":
 		if e.complexity.Order.Calification == nil {
@@ -292,6 +269,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Order.User(childComplexity), true
+
+	case "OrderCreated.toke":
+		if e.complexity.OrderCreated.Toke == nil {
+			break
+		}
+
+		return e.complexity.OrderCreated.Toke(childComplexity), true
+
+	case "OrderCreated.url":
+		if e.complexity.OrderCreated.URL == nil {
+			break
+		}
+
+		return e.complexity.OrderCreated.URL(childComplexity), true
 
 	case "Query.order":
 		if e.complexity.Query.Order == nil {
@@ -503,6 +494,11 @@ type Order {
   tv: Television!
 }
 
+type OrderCreated {
+  toke: String!
+  url: String!
+}
+
 type Query {
   users: [User!]!
   technicians: [Technician!]!
@@ -531,13 +527,7 @@ input NewTelevision {
 }
 
 input NewOrder {
-  status: String!
-  calification: Int
-  feedback: String
-  url: String
-  user: NewUser!
-  technician: NewTechnician!
-  tv: NewTelevision!
+  description: String!
 }
 
 input Login {
@@ -552,13 +542,11 @@ input RefreshTokenInput{
 
 type Mutation {
   createUser(input: NewUser!): String!
-  createTechnician(input: NewTechnician!): Technician!
+  createTechnician(input: NewTechnician!): String!
   createTelevision(input: NewTelevision!): Television!
-  createOrder(input: NewOrder!): Order!
+  createOrder(input: NewOrder!, login: Login!): OrderCreated!
 
-  updateUser(input: NewUser!): String!
-  updateTechnician(input: NewTechnician!): Technician!
-  updateOrder(input: NewOrder!): Order!
+  updateOrder(token: String!, input: NewOrder!): String!
 
   login(input: Login!): String!
   refreshToken(input: RefreshTokenInput!): String!
@@ -582,6 +570,14 @@ func (ec *executionContext) field_Mutation_createOrder_args(ctx context.Context,
 		}
 	}
 	args["input"] = arg0
+	var arg1 model.Login
+	if tmp, ok := rawArgs["login"]; ok {
+		arg1, err = ec.unmarshalNLogin2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐLogin(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["login"] = arg1
 	return args, nil
 }
 
@@ -658,42 +654,22 @@ func (ec *executionContext) field_Mutation_refreshToken_args(ctx context.Context
 func (ec *executionContext) field_Mutation_updateOrder_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.NewOrder
-	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNNewOrder2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewOrder(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["token"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updateTechnician_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.NewTechnician
+	args["token"] = arg0
+	var arg1 model.NewOrder
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNNewTechnician2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTechnician(ctx, tmp)
+		arg1, err = ec.unmarshalNNewOrder2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewOrder(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.NewUser
-	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNNewUser2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewUser(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
+	args["input"] = arg1
 	return args, nil
 }
 
@@ -838,9 +814,9 @@ func (ec *executionContext) _Mutation_createTechnician(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Technician)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNTechnician2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐTechnician(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_createTelevision(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -908,7 +884,7 @@ func (ec *executionContext) _Mutation_createOrder(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateOrder(rctx, args["input"].(model.NewOrder))
+		return ec.resolvers.Mutation().CreateOrder(rctx, args["input"].(model.NewOrder), args["login"].(model.Login))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -920,91 +896,9 @@ func (ec *executionContext) _Mutation_createOrder(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Order)
+	res := resTmp.(*model.OrderCreated)
 	fc.Result = res
-	return ec.marshalNOrder2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐOrder(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updateUser_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateUser(rctx, args["input"].(model.NewUser))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_updateTechnician(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_updateTechnician_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateTechnician(rctx, args["input"].(model.NewTechnician))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Technician)
-	fc.Result = res
-	return ec.marshalNTechnician2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐTechnician(ctx, field.Selections, res)
+	return ec.marshalNOrderCreated2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐOrderCreated(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_updateOrder(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1031,7 +925,7 @@ func (ec *executionContext) _Mutation_updateOrder(ctx context.Context, field gra
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateOrder(rctx, args["input"].(model.NewOrder))
+		return ec.resolvers.Mutation().UpdateOrder(rctx, args["token"].(string), args["input"].(model.NewOrder))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1043,9 +937,9 @@ func (ec *executionContext) _Mutation_updateOrder(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Order)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNOrder2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐOrder(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1391,6 +1285,74 @@ func (ec *executionContext) _Order_tv(ctx context.Context, field graphql.Collect
 	res := resTmp.(*model.Television)
 	fc.Result = res
 	return ec.marshalNTelevision2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐTelevision(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OrderCreated_toke(ctx context.Context, field graphql.CollectedField, obj *model.OrderCreated) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OrderCreated",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Toke, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OrderCreated_url(ctx context.Context, field graphql.CollectedField, obj *model.OrderCreated) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "OrderCreated",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_users(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3098,45 +3060,9 @@ func (ec *executionContext) unmarshalInputNewOrder(ctx context.Context, obj inte
 
 	for k, v := range asMap {
 		switch k {
-		case "status":
+		case "description":
 			var err error
-			it.Status, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "calification":
-			var err error
-			it.Calification, err = ec.unmarshalOInt2ᚖint(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "feedback":
-			var err error
-			it.Feedback, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "url":
-			var err error
-			it.URL, err = ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "user":
-			var err error
-			it.User, err = ec.unmarshalNNewUser2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewUser(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "technician":
-			var err error
-			it.Technician, err = ec.unmarshalNNewTechnician2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTechnician(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "tv":
-			var err error
-			it.Tv, err = ec.unmarshalNNewTelevision2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTelevision(ctx, v)
+			it.Description, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3303,16 +3229,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "updateUser":
-			out.Values[i] = ec._Mutation_updateUser(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "updateTechnician":
-			out.Values[i] = ec._Mutation_updateTechnician(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "updateOrder":
 			out.Values[i] = ec._Mutation_updateOrder(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -3378,6 +3294,38 @@ func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "tv":
 			out.Values[i] = ec._Order_tv(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var orderCreatedImplementors = []string{"OrderCreated"}
+
+func (ec *executionContext) _OrderCreated(ctx context.Context, sel ast.SelectionSet, obj *model.OrderCreated) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, orderCreatedImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OrderCreated")
+		case "toke":
+			out.Values[i] = ec._OrderCreated_toke(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "url":
+			out.Values[i] = ec._OrderCreated_url(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3898,36 +3846,12 @@ func (ec *executionContext) unmarshalNNewTechnician2githubᚗcomᚋcybernukiᚋS
 	return ec.unmarshalInputNewTechnician(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNNewTechnician2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTechnician(ctx context.Context, v interface{}) (*model.NewTechnician, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNNewTechnician2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTechnician(ctx, v)
-	return &res, err
-}
-
 func (ec *executionContext) unmarshalNNewTelevision2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTelevision(ctx context.Context, v interface{}) (model.NewTelevision, error) {
 	return ec.unmarshalInputNewTelevision(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNNewTelevision2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTelevision(ctx context.Context, v interface{}) (*model.NewTelevision, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNNewTelevision2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTelevision(ctx, v)
-	return &res, err
-}
-
 func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (model.NewUser, error) {
 	return ec.unmarshalInputNewUser(ctx, v)
-}
-
-func (ec *executionContext) unmarshalNNewUser2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewUser(ctx context.Context, v interface{}) (*model.NewUser, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNNewUser2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewUser(ctx, v)
-	return &res, err
 }
 
 func (ec *executionContext) marshalNOrder2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐOrder(ctx context.Context, sel ast.SelectionSet, v model.Order) graphql.Marshaler {
@@ -3979,6 +3903,20 @@ func (ec *executionContext) marshalNOrder2ᚖgithubᚗcomᚋcybernukiᚋService_
 		return graphql.Null
 	}
 	return ec._Order(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNOrderCreated2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐOrderCreated(ctx context.Context, sel ast.SelectionSet, v model.OrderCreated) graphql.Marshaler {
+	return ec._OrderCreated(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOrderCreated2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐOrderCreated(ctx context.Context, sel ast.SelectionSet, v *model.OrderCreated) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._OrderCreated(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNRefreshTokenInput2githubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐRefreshTokenInput(ctx context.Context, v interface{}) (model.RefreshTokenInput, error) {

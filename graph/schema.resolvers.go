@@ -14,7 +14,6 @@ import (
 	"github.com/cybernuki/Service_Order_System/internal/tools"
 )
 
-// CreateUser - mutation that creates an user and returns the generated token
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
 	var user models.SchemaUser
 	user.Email = input.Email
@@ -30,9 +29,19 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 	return token, err
 }
 
-func (r *mutationResolver) CreateTechnician(ctx context.Context, input model.NewTechnician) (*model.Technician, error) {
-	fmt.Errorf("not implemented technician")
-	return nil, nil
+func (r *mutationResolver) CreateTechnician(ctx context.Context, input model.NewTechnician) (string, error) {
+	var technician models.SchemaTechnician
+	technician.Email = input.Email
+	technician.Password = input.Password
+	technician.FirstName = input.FirstName
+	technician.LastName = input.LastName
+
+	err := technician.Create()
+	if err != nil {
+		return "", err
+	}
+	token, err := jwt.GenerateToken(technician.Email)
+	return token, err
 }
 
 func (r *mutationResolver) CreateTelevision(ctx context.Context, input model.NewTelevision) (*model.Television, error) {
@@ -47,19 +56,11 @@ func (r *mutationResolver) CreateTelevision(ctx context.Context, input model.New
 	return &model.Television{ID: fmt.Sprint(newTv.ID), Model: newTv.ModelTV, Brand: newTv.Brand}, nil
 }
 
-func (r *mutationResolver) CreateOrder(ctx context.Context, input model.NewOrder) (*model.Order, error) {
+func (r *mutationResolver) CreateOrder(ctx context.Context, input model.NewOrder, login model.Login) (*model.OrderCreated, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) UpdateUser(ctx context.Context, input model.NewUser) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) UpdateTechnician(ctx context.Context, input model.NewTechnician) (*model.Technician, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *mutationResolver) UpdateOrder(ctx context.Context, input model.NewOrder) (*model.Order, error) {
+func (r *mutationResolver) UpdateOrder(ctx context.Context, token string, input model.NewOrder) (string, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
@@ -131,3 +132,16 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) UpdateUser(ctx context.Context, input model.NewUser) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+func (r *mutationResolver) UpdateTechnician(ctx context.Context, input model.NewTechnician) (string, error) {
+	panic(fmt.Errorf("not implemented"))
+}

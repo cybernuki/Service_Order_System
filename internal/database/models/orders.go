@@ -7,6 +7,7 @@ import (
 // SchemaOrder - Defines an Order model of the database
 type SchemaOrder struct {
 	gorm.Model
+	Description  string           `gorm:"type:text;default:''"`
 	Status       string           `gorm:"type:enum('Created','Pending','Done');not null"`
 	Calification int              `gorm:"type:tinyint;default:1"`
 	Feedback     string           `gorm:"type:tinytext;default:''"`

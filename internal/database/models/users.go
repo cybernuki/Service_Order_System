@@ -3,7 +3,6 @@ package models
 import (
 	"github.com/cybernuki/Service_Order_System/internal/tools"
 	"github.com/jinzhu/gorm"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // SchemaUser - defines a User model of the database
@@ -18,7 +17,7 @@ type SchemaUser struct {
 // Create - creates a new Television regist
 func (user *SchemaUser) Create() error {
 	var hashedPassword string
-	err := emptyFields(*user)
+	err := emptyFieldsUser(*user)
 
 	if err != nil {
 		return err
@@ -61,19 +60,7 @@ func GetUserIDByEmail(email string) (uint, error) {
 	return found.ID, nil
 }
 
-//HashPassword hashes given password
-func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-//CheckPasswordHash hash compares raw password with it's hashed values
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
-}
-
-func emptyFields(user SchemaUser) error {
+func emptyFieldsUser(user SchemaUser) error {
 	if user.Email == "" {
 		return tools.NewError("email field cannot be empty")
 	}
