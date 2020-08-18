@@ -13,3 +13,9 @@ func (e *errorString) Error() string {
 func NewError(text string) error {
 	return &errorString{text}
 }
+
+type WrongUsernameOrPasswordError struct{}
+
+func (m *WrongUsernameOrPasswordError) Error() string {
+	return "wrong username or password"
+}

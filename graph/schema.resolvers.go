@@ -11,6 +11,7 @@ import (
 	"github.com/cybernuki/Service_Order_System/graph/model"
 	"github.com/cybernuki/Service_Order_System/internal/database/models"
 	"github.com/cybernuki/Service_Order_System/internal/jwt"
+	"github.com/cybernuki/Service_Order_System/internal/tools"
 )
 
 // CreateUser - mutation that creates an user and returns the generated token
@@ -63,7 +64,18 @@ func (r *mutationResolver) UpdateOrder(ctx context.Context, input model.NewOrder
 }
 
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	var user models.SchemaUser
+	user.Email = input.Email
+	user.Password = input.Password
+	correct := user.Authenticate()
+	if !correct {
+		return "", &tools.WrongUsernameOrPasswordError{}
+	}
+	token, err := jwt.GenerateToken(user.Email)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshTokenInput) (string, error) {

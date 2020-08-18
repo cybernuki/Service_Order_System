@@ -41,6 +41,16 @@ func (user *SchemaUser) Create() error {
 	return nil
 }
 
+// Authenticate - search the user and compare the given password
+func (user *SchemaUser) Authenticate() bool {
+	var found SchemaUser
+	err := Db.Find(&found, "email = ?", user.Email).Error
+	if err != nil {
+		return false
+	}
+	return CheckPasswordHash(user.Password, found.Password)
+}
+
 //GetUserIDByEmail check if a user exists in database by given email
 func GetUserIDByEmail(email string) (uint, error) {
 	var found SchemaUser
