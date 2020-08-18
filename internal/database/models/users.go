@@ -1,8 +1,6 @@
 package models
 
 import (
-	"log"
-
 	"github.com/cybernuki/Service_Order_System/internal/tools"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
@@ -30,12 +28,14 @@ func (user *SchemaUser) Create() error {
 		return tools.NewError("Signin not possible")
 	}
 	user.Password = hashedPassword
-	if !Db.NewRecord(user) {
+	user.ID, _ = GetUserIDByEmail(user.Email)
+	isNew := Db.NewRecord(user)
+
+	if !isNew {
 		return tools.NewError("User is duplicated")
 	}
 	err = Db.Create(user).Error
 	if err != nil {
-		log.Panicln(err)
 		return tools.NewError("Signin not possible")
 	}
 	return nil
