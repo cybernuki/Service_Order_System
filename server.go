@@ -9,21 +9,33 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/cybernuki/Service_Order_System/graph"
 	"github.com/cybernuki/Service_Order_System/graph/generated"
+	"github.com/cybernuki/Service_Order_System/internal/database/models"
 )
 
 const defaultPort = "8000"
 
 func main() {
+	// Getting user listening port
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
+	models.InitDB(models.DBConfigParams{})
+	// Getting user migration requeriment
+	migration := os.Getenv("MIGRATE")
+	if migration == "" || migration == "True" {
+		models.MigrateAll()
+	}
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	if false {
+		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+		http.Handle("/query", srv)
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+		log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+		http.ListenAndServe(":"+port, nil)
+	}
+
+	defer models.CloseDB()
 }

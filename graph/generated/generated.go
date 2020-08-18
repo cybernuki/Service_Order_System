@@ -60,10 +60,10 @@ type ComplexityRoot struct {
 		Feedback     func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Status       func(childComplexity int) int
-		TechnicianID func(childComplexity int) int
-		TvID         func(childComplexity int) int
+		Technician   func(childComplexity int) int
+		Tv           func(childComplexity int) int
 		URL          func(childComplexity int) int
-		UserID       func(childComplexity int) int
+		User         func(childComplexity int) int
 	}
 
 	Query struct {
@@ -81,9 +81,9 @@ type ComplexityRoot struct {
 	}
 
 	Television struct {
-		Band  func(childComplexity int) int
-		ID    func(childComplexity int) int
-		Model func(childComplexity int) int
+		Brand   func(childComplexity int) int
+		ID      func(childComplexity int) int
+		ModelTv func(childComplexity int) int
 	}
 
 	User struct {
@@ -264,19 +264,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Order.Status(childComplexity), true
 
-	case "Order.technician_id":
-		if e.complexity.Order.TechnicianID == nil {
+	case "Order.technician":
+		if e.complexity.Order.Technician == nil {
 			break
 		}
 
-		return e.complexity.Order.TechnicianID(childComplexity), true
+		return e.complexity.Order.Technician(childComplexity), true
 
-	case "Order.tv_id":
-		if e.complexity.Order.TvID == nil {
+	case "Order.tv":
+		if e.complexity.Order.Tv == nil {
 			break
 		}
 
-		return e.complexity.Order.TvID(childComplexity), true
+		return e.complexity.Order.Tv(childComplexity), true
 
 	case "Order.url":
 		if e.complexity.Order.URL == nil {
@@ -285,12 +285,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Order.URL(childComplexity), true
 
-	case "Order.user_id":
-		if e.complexity.Order.UserID == nil {
+	case "Order.user":
+		if e.complexity.Order.User == nil {
 			break
 		}
 
-		return e.complexity.Order.UserID(childComplexity), true
+		return e.complexity.Order.User(childComplexity), true
 
 	case "Query.order":
 		if e.complexity.Query.Order == nil {
@@ -353,12 +353,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Technician.LastName(childComplexity), true
 
-	case "Television.band":
-		if e.complexity.Television.Band == nil {
+	case "Television.brand":
+		if e.complexity.Television.Brand == nil {
 			break
 		}
 
-		return e.complexity.Television.Band(childComplexity), true
+		return e.complexity.Television.Brand(childComplexity), true
 
 	case "Television.id":
 		if e.complexity.Television.ID == nil {
@@ -367,12 +367,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Television.ID(childComplexity), true
 
-	case "Television.model":
-		if e.complexity.Television.Model == nil {
+	case "Television.modelTV":
+		if e.complexity.Television.ModelTv == nil {
 			break
 		}
 
-		return e.complexity.Television.Model(childComplexity), true
+		return e.complexity.Television.ModelTv(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -479,8 +479,8 @@ type Technician {
 }
 type Television {
   id: ID!
-  model: String!
-  band: String!
+  modelTV: String!
+  brand: String!
 }
 
 type Order {
@@ -489,9 +489,9 @@ type Order {
   calification: Int
   feedback: String
   url: String
-  user_id: User!
-  technician_id: Technician!
-  tv_id: Television!
+  user: User!
+  technician: Technician!
+  tv: Television!
 }
 
 type Query {
@@ -522,9 +522,9 @@ input NewOrder {
   calification: Int
   feedback: String
   url: String
-  user_id: NewUser!
-  technician_id: NewTechnician!
-  tv_id: NewTelevision!
+  user: NewUser!
+  technician: NewTechnician!
+  tv: NewTelevision!
 }
 
 input Login {
@@ -1278,7 +1278,7 @@ func (ec *executionContext) _Order_url(ctx context.Context, field graphql.Collec
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Order_user_id(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
+func (ec *executionContext) _Order_user(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1295,7 +1295,7 @@ func (ec *executionContext) _Order_user_id(ctx context.Context, field graphql.Co
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.UserID, nil
+		return obj.User, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1312,7 +1312,7 @@ func (ec *executionContext) _Order_user_id(ctx context.Context, field graphql.Co
 	return ec.marshalNUser2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Order_technician_id(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
+func (ec *executionContext) _Order_technician(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1329,7 +1329,7 @@ func (ec *executionContext) _Order_technician_id(ctx context.Context, field grap
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TechnicianID, nil
+		return obj.Technician, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1346,7 +1346,7 @@ func (ec *executionContext) _Order_technician_id(ctx context.Context, field grap
 	return ec.marshalNTechnician2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐTechnician(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Order_tv_id(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
+func (ec *executionContext) _Order_tv(ctx context.Context, field graphql.CollectedField, obj *model.Order) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1363,7 +1363,7 @@ func (ec *executionContext) _Order_tv_id(ctx context.Context, field graphql.Coll
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.TvID, nil
+		return obj.Tv, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1762,7 +1762,7 @@ func (ec *executionContext) _Television_id(ctx context.Context, field graphql.Co
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Television_model(ctx context.Context, field graphql.CollectedField, obj *model.Television) (ret graphql.Marshaler) {
+func (ec *executionContext) _Television_modelTV(ctx context.Context, field graphql.CollectedField, obj *model.Television) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1779,7 +1779,7 @@ func (ec *executionContext) _Television_model(ctx context.Context, field graphql
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Model, nil
+		return obj.ModelTv, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1796,7 +1796,7 @@ func (ec *executionContext) _Television_model(ctx context.Context, field graphql
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Television_band(ctx context.Context, field graphql.CollectedField, obj *model.Television) (ret graphql.Marshaler) {
+func (ec *executionContext) _Television_brand(ctx context.Context, field graphql.CollectedField, obj *model.Television) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1813,7 +1813,7 @@ func (ec *executionContext) _Television_band(ctx context.Context, field graphql.
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Band, nil
+		return obj.Brand, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3075,21 +3075,21 @@ func (ec *executionContext) unmarshalInputNewOrder(ctx context.Context, obj inte
 			if err != nil {
 				return it, err
 			}
-		case "user_id":
+		case "user":
 			var err error
-			it.UserID, err = ec.unmarshalNNewUser2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewUser(ctx, v)
+			it.User, err = ec.unmarshalNNewUser2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewUser(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "technician_id":
+		case "technician":
 			var err error
-			it.TechnicianID, err = ec.unmarshalNNewTechnician2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTechnician(ctx, v)
+			it.Technician, err = ec.unmarshalNNewTechnician2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTechnician(ctx, v)
 			if err != nil {
 				return it, err
 			}
-		case "tv_id":
+		case "tv":
 			var err error
-			it.TvID, err = ec.unmarshalNNewTelevision2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTelevision(ctx, v)
+			it.Tv, err = ec.unmarshalNNewTelevision2ᚖgithubᚗcomᚋcybernukiᚋService_Order_SystemᚋgraphᚋmodelᚐNewTelevision(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3295,18 +3295,18 @@ func (ec *executionContext) _Order(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Order_feedback(ctx, field, obj)
 		case "url":
 			out.Values[i] = ec._Order_url(ctx, field, obj)
-		case "user_id":
-			out.Values[i] = ec._Order_user_id(ctx, field, obj)
+		case "user":
+			out.Values[i] = ec._Order_user(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "technician_id":
-			out.Values[i] = ec._Order_technician_id(ctx, field, obj)
+		case "technician":
+			out.Values[i] = ec._Order_technician(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "tv_id":
-			out.Values[i] = ec._Order_tv_id(ctx, field, obj)
+		case "tv":
+			out.Values[i] = ec._Order_tv(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -3474,13 +3474,13 @@ func (ec *executionContext) _Television(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "model":
-			out.Values[i] = ec._Television_model(ctx, field, obj)
+		case "modelTV":
+			out.Values[i] = ec._Television_modelTV(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "band":
-			out.Values[i] = ec._Television_band(ctx, field, obj)
+		case "brand":
+			out.Values[i] = ec._Television_brand(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

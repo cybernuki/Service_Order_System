@@ -11,8 +11,8 @@ type Technician {
 }
 type Television {
   id: ID!
-  model: String!
-  band: String!
+  modelTV: String!
+  brand: String!
 }
 
 type Order {
@@ -21,9 +21,9 @@ type Order {
   calification: Int
   feedback: String
   url: String
-  user_id: User!
-  technician_id: Technician!
-  tv_id: Television!
+  user: User!
+  technician: Technician!
+  tv: Television!
 }
 
 type Query {
@@ -54,9 +54,9 @@ input NewOrder {
   calification: Int
   feedback: String
   url: String
-  user_id: NewUser!
-  technician_id: NewTechnician!
-  tv_id: NewTelevision!
+  user: NewUser!
+  technician: NewTechnician!
+  tv: NewTelevision!
 }
 
 input Login {

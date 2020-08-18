@@ -12,9 +12,9 @@ type NewOrder struct {
 	Calification *int           `json:"calification"`
 	Feedback     *string        `json:"feedback"`
 	URL          *string        `json:"url"`
-	UserID       *NewUser       `json:"user_id"`
-	TechnicianID *NewTechnician `json:"technician_id"`
-	TvID         *NewTelevision `json:"tv_id"`
+	User         *NewUser       `json:"user"`
+	Technician   *NewTechnician `json:"technician"`
+	Tv           *NewTelevision `json:"tv"`
 }
 
 type NewTechnician struct {
@@ -38,9 +38,9 @@ type Order struct {
 	Calification *int        `json:"calification"`
 	Feedback     *string     `json:"feedback"`
 	URL          *string     `json:"url"`
-	UserID       *User       `json:"user_id"`
-	TechnicianID *Technician `json:"technician_id"`
-	TvID         *Television `json:"tv_id"`
+	User         *User       `json:"user"`
+	Technician   *Technician `json:"technician"`
+	Tv           *Television `json:"tv"`
 }
 
 type RefreshTokenInput struct {
@@ -54,9 +54,9 @@ type Technician struct {
 }
 
 type Television struct {
-	ID    string `json:"id"`
-	Model string `json:"model"`
-	Band  string `json:"band"`
+	ID      string `json:"id"`
+	ModelTv string `json:"modelTV"`
+	Brand   string `json:"brand"`
 }
 
 type User struct {
