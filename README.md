@@ -5,4 +5,4 @@ It is a service order system implemented using Golang
 You can build the image by:
 `docker build -t golang-ubuntu:1151604 .`
 and start it by:
-`docker run golang-ubuntu:1151604 `
+`docker run -p 3000:3000 golang-ubuntu:1151604 `

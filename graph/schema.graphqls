@@ -1,0 +1,84 @@
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+}
+type Technician {
+  id: ID!
+  firstName: String!
+  lastName: String!
+}
+type Television {
+  id: ID!
+  model: String!
+  band: String!
+}
+
+type Order {
+  id: ID!
+  status: String!
+  calification: Int
+  feedback: String
+  url: String
+  user_id: User!
+  technician_id: Technician!
+  tv_id: Television!
+}
+
+type Query {
+  users: [User!]!
+  technicians: [Technician!]!
+  televisions: [Television!]!
+  orders: [Order!]!
+  order(input: String!): Order!
+}
+
+input NewUser {
+  firstName: String!
+  lastName: String!
+}
+
+input NewTechnician {
+  firstName: String!
+  lastName: String!
+}
+
+input NewTelevision {
+  model: String!
+  band: String!
+}
+
+input NewOrder {
+  status: String!
+  calification: Int
+  feedback: String
+  url: String
+  user_id: NewUser!
+  technician_id: NewTechnician!
+  tv_id: NewTelevision!
+}
+
+input Login {
+  email: String!
+  password: String!
+}
+
+input RefreshTokenInput{
+  token: String!
+}
+
+
+type Mutation {
+  createUser(input: NewUser!): String!
+  createTechnician(input: NewTechnician!): Technician!
+  createTelevision(input: NewTelevision!): Television!
+  createOrder(input: NewOrder!): Order!
+
+  updateUser(input: NewUser!): String!
+  updateTechnician(input: NewTechnician!): Technician!
+  updateOrder(input: NewOrder!): Order!
+
+  login(input: Login!): String!
+  refreshToken(input: RefreshTokenInput!): String!
+}
