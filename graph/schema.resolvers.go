@@ -79,7 +79,15 @@ func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshTokenInput) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	email, err := jwt.ParseToken(input.Token)
+	if err != nil {
+		return "", tools.NewError("access denied")
+	}
+	token, err := jwt.GenerateToken(email)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {

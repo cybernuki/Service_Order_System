@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/cybernuki/Service_Order_System/internal/tools"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -33,7 +34,11 @@ func ParseToken(tokenStr string) (string, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		return SecretKey, nil
 	})
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	if token == nil {
+		return "", tools.NewError("Not a correct token")
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
 		email := claims["email"].(string)
 		return email, nil
 	}
