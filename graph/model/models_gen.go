@@ -24,7 +24,7 @@ type NewTechnician struct {
 
 type NewTelevision struct {
 	Model string `json:"model"`
-	Band  string `json:"band"`
+	Brand string `json:"brand"`
 }
 
 type NewUser struct {
@@ -54,9 +54,9 @@ type Technician struct {
 }
 
 type Television struct {
-	ID      string `json:"id"`
-	ModelTv string `json:"modelTV"`
-	Brand   string `json:"brand"`
+	ID    string `json:"id"`
+	Model string `json:"model"`
+	Brand string `json:"brand"`
 }
 
 type User struct {

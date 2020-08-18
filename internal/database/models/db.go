@@ -31,7 +31,7 @@ func (d *defaultParams) newDefs() {
 }
 
 // InitDB - creates a season to the database
-func InitDB(cnf DBConfigParams) {
+func InitDB(cnf DBConfigParams) error {
 	paramsParser(&cnf)
 	connection := fmt.Sprintf("%s:%s@(%s)/%s?%s", cnf.user, cnf.pass, cnf.host, cnf.dbname, cnf.options)
 
@@ -39,43 +39,45 @@ func InitDB(cnf DBConfigParams) {
 	if err != nil {
 		log.Println("Failed to connect database")
 		log.Panic(err)
-	} else {
-		log.Println("--- Database Connected ---")
+		return err
 	}
+	log.Println("--- Database Connected ---")
 	Db = db
+	return nil
 }
 
 // MigrateAll - execute a migration in all schemas implemented
 // in the model package
 func MigrateAll() {
+	log.Println("--- Migrating Database ---")
 	if Db == nil {
 		log.Panicln("Database is null")
 	} else if Db.DB().Ping() != nil {
 		log.Panicln("Database sesion is down")
 	} else {
-		Db.AutoMigrate(&Order{})
-		Db.AutoMigrate(&User{})
-		Db.AutoMigrate(&Technician{})
-		Db.AutoMigrate(&Television{})
-
-		Db.Model(&Order{}).AddForeignKey(
+		Db.AutoMigrate(&SchemaUser{})
+		Db.AutoMigrate(&SchemaTechnician{})
+		Db.AutoMigrate(&SchemaTelevision{})
+		Db.AutoMigrate(&SchemaOrder{})
+		Db.Model(&SchemaOrder{}).AddForeignKey(
 			"id",
-			"users(id)",
+			"schema_users(id)",
 			"CASCADE",
 			"CASCADE",
 		)
-		Db.Model(&Order{}).AddForeignKey(
+		Db.Model(&SchemaOrder{}).AddForeignKey(
 			"id",
-			"technicians(id)",
+			"schema_technicians(id)",
 			"CASCADE",
 			"CASCADE",
 		)
-		Db.Model(&Order{}).AddForeignKey(
+		Db.Model(&SchemaOrder{}).AddForeignKey(
 			"id",
-			"televisions(id)",
+			"schema_televisions(id)",
 			"CASCADE",
 			"CASCADE",
 		)
+		log.Println("--- Migration Completed ---")
 	}
 }
 

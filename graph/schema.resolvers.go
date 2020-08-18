@@ -9,6 +9,7 @@ import (
 
 	"github.com/cybernuki/Service_Order_System/graph/generated"
 	"github.com/cybernuki/Service_Order_System/graph/model"
+	"github.com/cybernuki/Service_Order_System/internal/database/models"
 )
 
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
@@ -22,7 +23,15 @@ func (r *mutationResolver) CreateTechnician(ctx context.Context, input model.New
 }
 
 func (r *mutationResolver) CreateTelevision(ctx context.Context, input model.NewTelevision) (*model.Television, error) {
-	panic(fmt.Errorf("not implemented"))
+	var newTv models.SchemaTelevision
+
+	newTv.ModelTV = input.Model
+	newTv.Brand = input.Brand
+	err := newTv.Create()
+	if err != nil {
+		return nil, err
+	}
+	return &model.Television{ID: fmt.Sprint(newTv.ID), Model: newTv.ModelTV, Brand: newTv.Brand}, nil
 }
 
 func (r *mutationResolver) CreateOrder(ctx context.Context, input model.NewOrder) (*model.Order, error) {
@@ -58,7 +67,20 @@ func (r *queryResolver) Technicians(ctx context.Context) ([]*model.Technician, e
 }
 
 func (r *queryResolver) Televisions(ctx context.Context) ([]*model.Television, error) {
-	panic(fmt.Errorf("not implemented"))
+	var television models.SchemaTelevision
+
+	allSchemas, err := television.All()
+
+	var allTelevisions = make([]*model.Television, len(allSchemas))
+
+	for i := 0; i < len(allSchemas); i++ {
+		var tv model.Television
+		tv.ID = fmt.Sprint(allSchemas[i].ID)
+		tv.Model = allSchemas[i].ModelTV
+		tv.Brand = allSchemas[i].Brand
+		allTelevisions[i] = &tv
+	}
+	return allTelevisions, err
 }
 
 func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {

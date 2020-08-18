@@ -11,7 +11,7 @@ type Technician {
 }
 type Television {
   id: ID!
-  modelTV: String!
+  model: String!
   brand: String!
 }
 
@@ -46,7 +46,7 @@ input NewTechnician {
 
 input NewTelevision {
   model: String!
-  band: String!
+  brand: String!
 }
 
 input NewOrder {

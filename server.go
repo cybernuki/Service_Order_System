@@ -20,14 +20,17 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
-	models.InitDB(models.DBConfigParams{})
+	if models.InitDB(models.DBConfigParams{}) != nil {
+		os.Exit(-127)
+	}
+
 	// Getting user migration requeriment
 	migration := os.Getenv("MIGRATE")
-	if migration == "" || migration == "True" {
+	if migration == "true" || migration == "True" {
 		models.MigrateAll()
 	}
 
-	if false {
+	if true {
 		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))

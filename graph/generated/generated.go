@@ -81,9 +81,9 @@ type ComplexityRoot struct {
 	}
 
 	Television struct {
-		Brand   func(childComplexity int) int
-		ID      func(childComplexity int) int
-		ModelTv func(childComplexity int) int
+		Brand func(childComplexity int) int
+		ID    func(childComplexity int) int
+		Model func(childComplexity int) int
 	}
 
 	User struct {
@@ -367,12 +367,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Television.ID(childComplexity), true
 
-	case "Television.modelTV":
-		if e.complexity.Television.ModelTv == nil {
+	case "Television.model":
+		if e.complexity.Television.Model == nil {
 			break
 		}
 
-		return e.complexity.Television.ModelTv(childComplexity), true
+		return e.complexity.Television.Model(childComplexity), true
 
 	case "User.email":
 		if e.complexity.User.Email == nil {
@@ -479,7 +479,7 @@ type Technician {
 }
 type Television {
   id: ID!
-  modelTV: String!
+  model: String!
   brand: String!
 }
 
@@ -514,7 +514,7 @@ input NewTechnician {
 
 input NewTelevision {
   model: String!
-  band: String!
+  brand: String!
 }
 
 input NewOrder {
@@ -1762,7 +1762,7 @@ func (ec *executionContext) _Television_id(ctx context.Context, field graphql.Co
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Television_modelTV(ctx context.Context, field graphql.CollectedField, obj *model.Television) (ret graphql.Marshaler) {
+func (ec *executionContext) _Television_model(ctx context.Context, field graphql.CollectedField, obj *model.Television) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1779,7 +1779,7 @@ func (ec *executionContext) _Television_modelTV(ctx context.Context, field graph
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ModelTv, nil
+		return obj.Model, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3135,9 +3135,9 @@ func (ec *executionContext) unmarshalInputNewTelevision(ctx context.Context, obj
 			if err != nil {
 				return it, err
 			}
-		case "band":
+		case "brand":
 			var err error
-			it.Band, err = ec.unmarshalNString2string(ctx, v)
+			it.Brand, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3474,8 +3474,8 @@ func (ec *executionContext) _Television(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "modelTV":
-			out.Values[i] = ec._Television_modelTV(ctx, field, obj)
+		case "model":
+			out.Values[i] = ec._Television_model(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
