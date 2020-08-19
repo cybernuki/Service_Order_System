@@ -18,6 +18,7 @@ type Television {
 
 type Order {
   id: ID!
+  description: String!
   status: String!
   calification: Int
   feedback: String
@@ -28,14 +29,11 @@ type Order {
 }
 
 type OrderCreated {
-  toke: String!
+  token: String!
   url: String!
 }
 
 type Query {
-  users: [User!]!
-  technicians: [Technician!]!
-  televisions: [Television!]!
   orders: [Order!]!
   order(input: String!): Order!
 }
@@ -61,6 +59,7 @@ input NewTelevision {
 
 input NewOrder {
   description: String!
+  television: NewTelevision!
 }
 
 input Login {
@@ -76,8 +75,7 @@ input RefreshTokenInput{
 type Mutation {
   createUser(input: NewUser!): String!
   createTechnician(input: NewTechnician!): String!
-  createTelevision(input: NewTelevision!): Television!
-  createOrder(input: NewOrder!, login: Login!): OrderCreated!
+  createOrder(input: NewOrder!): OrderCreated!
 
   updateOrder(token: String!, input: NewOrder!): String!
 

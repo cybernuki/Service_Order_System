@@ -59,7 +59,6 @@ func MigrateAll() {
 		Db.AutoMigrate(&SchemaUser{})
 		Db.AutoMigrate(&SchemaTechnician{})
 		Db.AutoMigrate(&SchemaTelevision{})
-		Db.AutoMigrate(&SchemaOrder{})
 		Db.Model(&SchemaOrder{}).AddForeignKey(
 			"id",
 			"schema_users(id)",
@@ -78,6 +77,7 @@ func MigrateAll() {
 			"CASCADE",
 			"CASCADE",
 		)
+		Db.AutoMigrate(&SchemaOrder{})
 		log.Println("--- Migration Completed ---")
 	}
 }

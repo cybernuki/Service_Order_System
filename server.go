@@ -6,12 +6,12 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/cybernuki/Service_Order_System/graph"
 	"github.com/cybernuki/Service_Order_System/graph/generated"
 	"github.com/cybernuki/Service_Order_System/internal/auth"
 	"github.com/cybernuki/Service_Order_System/internal/database/models"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 )
 
 const defaultPort = "8000"
@@ -28,15 +28,15 @@ func main() {
 
 	// Getting user migration requeriment
 	migration := os.Getenv("MIGRATE")
-	if migration == "true" || migration == "True" {
+	if migration == "" || migration == "True" {
 		models.MigrateAll()
 	}
 	router := chi.NewRouter()
+	router.Use(middleware.Logger)
 	router.Use(auth.Middleware())
 
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
-	router.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	router.Handle("/graphql", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)

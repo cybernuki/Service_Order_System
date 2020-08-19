@@ -1,6 +1,8 @@
 package models
 
 import (
+	"log"
+
 	"github.com/cybernuki/Service_Order_System/internal/tools"
 	"github.com/jinzhu/gorm"
 )
@@ -74,4 +76,14 @@ func emptyFieldsTechnician(technician SchemaTechnician) error {
 		return tools.NewError("LastName field cannot be empty")
 	}
 	return nil
+}
+
+// All - return all the televisions in the database
+func (technician *SchemaTechnician) All() ([]*SchemaTechnician, error) {
+	var technicians []*SchemaTechnician
+	err := Db.Find(&technicians).Error
+	if err != nil {
+		log.Println(err)
+	}
+	return technicians, err
 }

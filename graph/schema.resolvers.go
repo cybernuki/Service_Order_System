@@ -6,9 +6,11 @@ package graph
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/cybernuki/Service_Order_System/graph/generated"
 	"github.com/cybernuki/Service_Order_System/graph/model"
+	"github.com/cybernuki/Service_Order_System/internal/auth"
 	"github.com/cybernuki/Service_Order_System/internal/database/models"
 	"github.com/cybernuki/Service_Order_System/internal/jwt"
 	"github.com/cybernuki/Service_Order_System/internal/tools"
@@ -44,20 +46,36 @@ func (r *mutationResolver) CreateTechnician(ctx context.Context, input model.New
 	return token, err
 }
 
-func (r *mutationResolver) CreateTelevision(ctx context.Context, input model.NewTelevision) (*model.Television, error) {
-	var newTv models.SchemaTelevision
+func (r *mutationResolver) CreateOrder(ctx context.Context, input model.NewOrder) (*model.OrderCreated, error) {
+	var tv models.SchemaTelevision
+	var newOrder models.SchemaOrder
 
-	newTv.ModelTV = input.Model
-	newTv.Brand = input.Brand
-	err := newTv.Create()
+	// Authorization
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, tools.NewError("access denied")
+	}
+	models.Db.Find(&user, "email = ?", user.Email)
+	// get the tv
+	tv.ModelTV = input.Television.Model
+	tv.Brand = input.Television.Brand
+	tv.Create()
+
+	// create the new service order
+	newOrder.Description = input.Description
+	err := newOrder.Create(*user, tv)
 	if err != nil {
 		return nil, err
 	}
-	return &model.Television{ID: fmt.Sprint(newTv.ID), Model: newTv.ModelTV, Brand: newTv.Brand}, nil
-}
-
-func (r *mutationResolver) CreateOrder(ctx context.Context, input model.NewOrder, login model.Login) (*model.OrderCreated, error) {
-	panic(fmt.Errorf("not implemented"))
+	token, err := jwt.GenerateToken(strconv.Itoa(int(newOrder.ID)))
+	if err != nil {
+		return nil, err
+	}
+	order := model.OrderCreated{
+		Token: token,
+		URL:   "localhost:8000/orders/" + strconv.Itoa(int(newOrder.ID)),
+	}
+	return &order, nil
 }
 
 func (r *mutationResolver) UpdateOrder(ctx context.Context, token string, input model.NewOrder) (string, error) {
@@ -91,31 +109,6 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 	return token, nil
 }
 
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *queryResolver) Technicians(ctx context.Context) ([]*model.Technician, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-
-func (r *queryResolver) Televisions(ctx context.Context) ([]*model.Television, error) {
-	var television models.SchemaTelevision
-
-	allSchemas, err := television.All()
-
-	var allTelevisions = make([]*model.Television, len(allSchemas))
-
-	for i := 0; i < len(allSchemas); i++ {
-		var tv model.Television
-		tv.ID = fmt.Sprint(allSchemas[i].ID)
-		tv.Model = allSchemas[i].ModelTV
-		tv.Brand = allSchemas[i].Brand
-		allTelevisions[i] = &tv
-	}
-	return allTelevisions, err
-}
-
 func (r *queryResolver) Orders(ctx context.Context) ([]*model.Order, error) {
 	panic(fmt.Errorf("not implemented"))
 }
@@ -132,16 +125,3 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-func (r *mutationResolver) UpdateUser(ctx context.Context, input model.NewUser) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}
-func (r *mutationResolver) UpdateTechnician(ctx context.Context, input model.NewTechnician) (string, error) {
-	panic(fmt.Errorf("not implemented"))
-}

@@ -8,7 +8,8 @@ type Login struct {
 }
 
 type NewOrder struct {
-	Description string `json:"description"`
+	Description string         `json:"description"`
+	Television  *NewTelevision `json:"television"`
 }
 
 type NewTechnician struct {
@@ -32,6 +33,7 @@ type NewUser struct {
 
 type Order struct {
 	ID           string      `json:"id"`
+	Description  string      `json:"description"`
 	Status       string      `json:"status"`
 	Calification *int        `json:"calification"`
 	Feedback     *string     `json:"feedback"`
@@ -42,8 +44,8 @@ type Order struct {
 }
 
 type OrderCreated struct {
-	Toke string `json:"toke"`
-	URL  string `json:"url"`
+	Token string `json:"token"`
+	URL   string `json:"url"`
 }
 
 type RefreshTokenInput struct {
